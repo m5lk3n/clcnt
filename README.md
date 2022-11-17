@@ -15,5 +15,8 @@ go get -u github.com/gin-gonic/gin
 
 ## to do
 
-- db as receiver
 - makefile
+
+## open
+
+- pdb as pointer?

@@ -9,18 +9,22 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+type PersonDB struct {
+	db *sql.DB
+}
+
 type person struct {
 	first_name string
 	last_name  string
 }
 
 // idempotent
-func createTable(db *sql.DB) {
+func (pdb PersonDB) createTable() {
 	persons_table := `CREATE TABLE persons (
         id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
         "first_name" TEXT,
         "last_name" TEXT);`
-	query, err := db.Prepare(persons_table)
+	query, err := pdb.db.Prepare(persons_table)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -28,9 +32,9 @@ func createTable(db *sql.DB) {
 	fmt.Println("Table created successfully!")
 }
 
-func getPersons(db *sql.DB) []person {
+func (pdb PersonDB) getPersons() []person {
 
-	rows, _ := db.Query("SELECT first_name, last_name FROM persons")
+	rows, _ := pdb.db.Query("SELECT first_name, last_name FROM persons")
 
 	defer rows.Close()
 
@@ -59,9 +63,9 @@ func getPersons(db *sql.DB) []person {
 	return people
 }
 
-func addPerson(db *sql.DB, newPerson person) (bool, error) {
+func (pdb PersonDB) addPerson(newPerson person) (bool, error) {
 
-	tx, err := db.Begin()
+	tx, err := pdb.db.Begin()
 	if err != nil {
 		return false, err
 	}
@@ -96,11 +100,12 @@ func main() {
 	file.Close()
 
 	database, _ := sql.Open("sqlite3", dbFile)
-	createTable(database)
-	added, _ := addPerson(database, person{"Joe", "Fool"})
+	pdb := PersonDB{database}
+	pdb.createTable()
+	added, _ := pdb.addPerson(person{"Joe", "Fool"})
 	if added {
 		fmt.Println("Person added successfully")
-		jf := getPersons(database)[0]
+		jf := pdb.getPersons()[0]
 		fmt.Println(jf.first_name + " " + jf.last_name)
 	}
 }
