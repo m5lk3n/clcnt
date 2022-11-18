@@ -9,77 +9,74 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type PersonDB struct {
+type EntryDB struct {
 	db *sql.DB
 }
 
-type person struct {
-	first_name string
-	last_name  string
+type entry struct {
+	food     string
+	calories int
 }
 
-// idempotent
-func (pdb PersonDB) createTable() {
-	persons_table := `CREATE TABLE persons (
-        id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-        "first_name" TEXT,
-        "last_name" TEXT);`
-	query, err := pdb.db.Prepare(persons_table)
+func checkErr(err error) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+// idempotent
+func (edb EntryDB) createTable() {
+	entriesTable := `CREATE TABLE entries (
+        id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+        "food" TEXT,
+        "calories" INTEGER);`
+	query, err := edb.db.Prepare(entriesTable)
+	checkErr(err)
+
 	query.Exec()
 	fmt.Println("Table created successfully!")
 }
 
-func (pdb PersonDB) getPersons() []person {
+func (edb EntryDB) getEntries() []entry {
 
-	rows, _ := pdb.db.Query("SELECT first_name, last_name FROM persons")
+	rows, _ := edb.db.Query("SELECT food, calories FROM entries")
 
 	defer rows.Close()
 
 	err := rows.Err()
-	if err != nil {
-		log.Fatal(err)
-	}
+	checkErr(err)
 
-	people := make([]person, 0)
+	entries := make([]entry, 0)
 
 	for rows.Next() {
-		ourPerson := person{}
-		err = rows.Scan(&ourPerson.first_name, &ourPerson.last_name)
-		if err != nil {
-			log.Fatal(err)
-		}
+		anEntry := entry{}
+		err = rows.Scan(&anEntry.food, &anEntry.calories)
+		checkErr(err)
 
-		people = append(people, ourPerson)
+		entries = append(entries, anEntry)
 	}
 
 	err = rows.Err()
-	if err != nil {
-		log.Fatal(err)
-	}
+	checkErr(err)
 
-	return people
+	return entries
 }
 
-func (pdb PersonDB) addPerson(newPerson person) (bool, error) {
+func (edb EntryDB) addEntry(newEntry entry) (bool, error) {
 
-	tx, err := pdb.db.Begin()
+	tx, err := edb.db.Begin()
 	if err != nil {
 		return false, err
 	}
 
-	stmt, err := tx.Prepare("INSERT INTO persons (first_name, last_name) VALUES (?, ?)")
-
+	stmt, err := tx.Prepare("INSERT INTO entries (food, calories) VALUES (?, ?)")
 	if err != nil {
 		return false, err
 	}
 
 	defer stmt.Close()
 
-	_, err = stmt.Exec(newPerson.first_name, newPerson.last_name)
-
+	_, err = stmt.Exec(newEntry.food, newEntry.calories)
 	if err != nil {
 		return false, err
 	}
@@ -94,18 +91,16 @@ func main() {
 	const dbFile = "database.db"
 
 	file, err := os.Create(dbFile)
-	if err != nil {
-		log.Fatal(err)
-	}
+	checkErr(err)
 	file.Close()
 
 	database, _ := sql.Open("sqlite3", dbFile)
-	pdb := PersonDB{database}
-	pdb.createTable()
-	added, _ := pdb.addPerson(person{"Joe", "Fool"})
+	edb := EntryDB{database}
+	edb.createTable()
+	added, _ := edb.addEntry(entry{"Bretzel", 300})
 	if added {
-		fmt.Println("Person added successfully")
-		jf := pdb.getPersons()[0]
-		fmt.Println(jf.first_name + " " + jf.last_name)
+		fmt.Println("Entry added successfully")
+		jf := edb.getEntries()[0]
+		fmt.Printf("%s %d\n", jf.food, jf.calories)
 	}
 }

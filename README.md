@@ -1,5 +1,7 @@
 # clcnt
 
+calories counter
+
 ## init
 
 ```
@@ -19,4 +21,4 @@ go get -u github.com/gin-gonic/gin
 
 ## open
 
-- pdb as pointer?
+- edb as pointer?
