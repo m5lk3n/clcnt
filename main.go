@@ -4,9 +4,12 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
+	"strconv"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -40,6 +43,7 @@ func (edb EntryDB) createTable() {
 	fmt.Println("Table created successfully!")
 }
 
+// move into package
 func (edb EntryDB) getEntries() []entry {
 
 	rows, _ := edb.db.Query("SELECT timestamp, food, calories FROM entries")
@@ -65,6 +69,7 @@ func (edb EntryDB) getEntries() []entry {
 	return entries
 }
 
+// move into package
 func (edb EntryDB) addEntry(newEntry entry) (bool, error) {
 
 	tx, err := edb.db.Begin()
@@ -89,8 +94,36 @@ func (edb EntryDB) addEntry(newEntry entry) (bool, error) {
 	return true, nil
 }
 
-func main() {
+func getEntries(c *gin.Context) {
 
+	entries := edb.getEntries()
+
+	if entries == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "No entries"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": entries})
+}
+
+func addEntry(c *gin.Context) {
+
+	food := c.Param("food")
+	calories := c.Param("calories")
+
+	entryCalories, err := strconv.Atoi(calories)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Illegal parameter"})
+		return
+	}
+
+	added, _ := edb.addEntry(entry{time.Now().Unix(), food, entryCalories})
+	if added {
+		c.JSON(http.StatusOK, gin.H{"message": "entry added"})
+	} // else TODO
+}
+
+func init() {
 	const dbFile = "database.db"
 
 	file, err := os.Create(dbFile)
@@ -98,13 +131,23 @@ func main() {
 	file.Close()
 
 	database, _ := sql.Open("sqlite3", dbFile)
-	edb := EntryDB{database}
+	edb = EntryDB{database}
 	edb.createTable()
-	added, _ := edb.addEntry(entry{time.Now().Unix(), "Bretzel", 300})
-	if added {
-		fmt.Println("Entry added successfully")
-		jf := edb.getEntries()[0]
-		timestamp := time.Unix(jf.timestamp, 0)
-		fmt.Printf("%v: %s %d\n", timestamp, jf.food, jf.calories)
+}
+
+var edb EntryDB
+
+func main() {
+
+	r := gin.Default()
+
+	v1 := r.Group("/api/v1")
+	{
+		v1.GET("entry", getEntries)
+		v1.POST("entry/:food/:calories", addEntry)
 	}
+
+	// By default it serves on :8080 unless a
+	// PORT environment variable was defined.
+	r.Run()
 }
