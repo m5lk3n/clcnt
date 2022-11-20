@@ -15,8 +15,9 @@ type EntryDB struct {
 }
 
 type entry struct {
-	food     string
-	calories int
+	timestamp int64
+	food      string
+	calories  int
 }
 
 func checkErr(err error) {
@@ -41,7 +42,7 @@ func (edb EntryDB) createTable() {
 
 func (edb EntryDB) getEntries() []entry {
 
-	rows, _ := edb.db.Query("SELECT food, calories FROM entries")
+	rows, _ := edb.db.Query("SELECT timestamp, food, calories FROM entries")
 
 	defer rows.Close()
 
@@ -52,7 +53,7 @@ func (edb EntryDB) getEntries() []entry {
 
 	for rows.Next() {
 		anEntry := entry{}
-		err = rows.Scan(&anEntry.food, &anEntry.calories)
+		err = rows.Scan(&anEntry.timestamp, &anEntry.food, &anEntry.calories)
 		checkErr(err)
 
 		entries = append(entries, anEntry)
@@ -78,7 +79,7 @@ func (edb EntryDB) addEntry(newEntry entry) (bool, error) {
 
 	defer stmt.Close()
 
-	_, err = stmt.Exec(time.Now().Unix(), newEntry.food, newEntry.calories)
+	_, err = stmt.Exec(newEntry.timestamp, newEntry.food, newEntry.calories)
 	if err != nil {
 		return false, err
 	}
@@ -99,10 +100,11 @@ func main() {
 	database, _ := sql.Open("sqlite3", dbFile)
 	edb := EntryDB{database}
 	edb.createTable()
-	added, _ := edb.addEntry(entry{"Bretzel", 300})
+	added, _ := edb.addEntry(entry{time.Now().Unix(), "Bretzel", 300})
 	if added {
 		fmt.Println("Entry added successfully")
 		jf := edb.getEntries()[0]
-		fmt.Printf("%s %d\n", jf.food, jf.calories)
+		timestamp := time.Unix(jf.timestamp, 0)
+		fmt.Printf("%v: %s %d\n", timestamp, jf.food, jf.calories)
 	}
 }
