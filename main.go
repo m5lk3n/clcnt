@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -28,6 +29,7 @@ func checkErr(err error) {
 func (edb EntryDB) createTable() {
 	entriesTable := `CREATE TABLE entries (
         id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+		"timestamp" INTEGER,
         "food" TEXT,
         "calories" INTEGER);`
 	query, err := edb.db.Prepare(entriesTable)
@@ -69,14 +71,14 @@ func (edb EntryDB) addEntry(newEntry entry) (bool, error) {
 		return false, err
 	}
 
-	stmt, err := tx.Prepare("INSERT INTO entries (food, calories) VALUES (?, ?)")
+	stmt, err := tx.Prepare("INSERT INTO entries (timestamp, food, calories) VALUES (?, ?, ?)")
 	if err != nil {
 		return false, err
 	}
 
 	defer stmt.Close()
 
-	_, err = stmt.Exec(newEntry.food, newEntry.calories)
+	_, err = stmt.Exec(time.Now().Unix(), newEntry.food, newEntry.calories)
 	if err != nil {
 		return false, err
 	}
