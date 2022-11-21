@@ -2,7 +2,7 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
+	"errors"
 	"log"
 	"net/http"
 	"os"
@@ -30,17 +30,24 @@ func checkErr(err error) {
 }
 
 // idempotent
-func (edb EntryDB) createTable() {
+func (edb EntryDB) createTableIfNeeded() {
 	entriesTable := `CREATE TABLE entries (
         id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 		"timestamp" INTEGER,
         "food" TEXT,
         "calories" INTEGER);`
 	query, err := edb.db.Prepare(entriesTable)
-	checkErr(err)
+	if err != nil {
+		if err.Error() == "table entries already exists" {
+			log.Println("table already exists, skip creation")
+			return
+		} else {
+			checkErr(err)
+		}
+	}
 
 	query.Exec()
-	fmt.Println("Table created successfully!")
+	log.Println("table created successfully")
 }
 
 // move into package
@@ -117,22 +124,35 @@ func addEntry(c *gin.Context) {
 		return
 	}
 
-	added, _ := edb.addEntry(entry{time.Now().Unix(), food, entryCalories})
+	added, err := edb.addEntry(entry{time.Now().Unix(), food, entryCalories})
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+
 	if added {
 		c.JSON(http.StatusOK, gin.H{"message": "entry added"})
-	} // else TODO
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "entry not added"})
+	}
 }
 
 func init() {
-	const dbFile = "database.db"
+	const dbFile = "clcnt.db"
 
-	file, err := os.Create(dbFile)
-	checkErr(err)
-	file.Close()
+	_, err := os.Stat(dbFile)
+	if errors.Is(err, os.ErrNotExist) {
+		file, err := os.Create(dbFile) // re-creates!
+		checkErr(err)
+		file.Close()
+		log.Println("database file created")
+	} else {
+		log.Println("database file already exists")
+	}
 
 	database, _ := sql.Open("sqlite3", dbFile)
 	edb = EntryDB{database}
-	edb.createTable()
+	edb.createTableIfNeeded()
 }
 
 var edb EntryDB
