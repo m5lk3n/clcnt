@@ -13,14 +13,14 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type EntryDB struct {
+type entryDB struct {
 	db *sql.DB
 }
 
 type entry struct {
-	timestamp int64
-	food      string
-	calories  int
+	Timestamp int64
+	Food      string
+	Calories  int
 }
 
 func checkErr(err error) {
@@ -30,7 +30,7 @@ func checkErr(err error) {
 }
 
 // idempotent
-func (edb EntryDB) createTableIfNeeded() {
+func (edb entryDB) createTableIfNeeded() {
 	entriesTable := `CREATE TABLE entries (
         id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 		"timestamp" INTEGER,
@@ -51,7 +51,7 @@ func (edb EntryDB) createTableIfNeeded() {
 }
 
 // move into package
-func (edb EntryDB) getEntries() []entry {
+func (edb entryDB) getEntries() []entry {
 
 	rows, _ := edb.db.Query("SELECT timestamp, food, calories FROM entries")
 
@@ -64,7 +64,7 @@ func (edb EntryDB) getEntries() []entry {
 
 	for rows.Next() {
 		anEntry := entry{}
-		err = rows.Scan(&anEntry.timestamp, &anEntry.food, &anEntry.calories)
+		err = rows.Scan(&anEntry.Timestamp, &anEntry.Food, &anEntry.Calories)
 		checkErr(err)
 
 		entries = append(entries, anEntry)
@@ -77,7 +77,7 @@ func (edb EntryDB) getEntries() []entry {
 }
 
 // move into package
-func (edb EntryDB) addEntry(newEntry entry) (bool, error) {
+func (edb entryDB) addEntry(newEntry entry) (bool, error) {
 
 	tx, err := edb.db.Begin()
 	if err != nil {
@@ -91,7 +91,7 @@ func (edb EntryDB) addEntry(newEntry entry) (bool, error) {
 
 	defer stmt.Close()
 
-	_, err = stmt.Exec(newEntry.timestamp, newEntry.food, newEntry.calories)
+	_, err = stmt.Exec(newEntry.Timestamp, newEntry.Food, newEntry.Calories)
 	if err != nil {
 		return false, err
 	}
@@ -110,13 +110,14 @@ func getEntries(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": entries})
+	c.JSON(http.StatusOK, gin.H{"entries": entries})
 }
 
 func addEntry(c *gin.Context) {
 
 	food := c.Param("food")
 	calories := c.Param("calories")
+	// timestamp := c.Param("timestamp")
 
 	entryCalories, err := strconv.Atoi(calories)
 	if err != nil {
@@ -151,11 +152,11 @@ func init() {
 	}
 
 	database, _ := sql.Open("sqlite3", dbFile)
-	edb = EntryDB{database}
+	edb = entryDB{database}
 	edb.createTableIfNeeded()
 }
 
-var edb EntryDB
+var edb entryDB
 
 func main() {
 
