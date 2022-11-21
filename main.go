@@ -113,11 +113,25 @@ func getEntries(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"entries": entries})
 }
 
+// tries to convert given string into timestamp
+// defaults to current Unix epoch time
+func defaultTimestamp(s string) int64 {
+
+	s = s[1:] // chop leading /
+
+	n, err := strconv.ParseInt(s, 10, 64)
+	if err == nil {
+		return n
+	}
+
+	return time.Now().Unix()
+}
+
 func addEntry(c *gin.Context) {
 
 	food := c.Param("food")
 	calories := c.Param("calories")
-	// timestamp := c.Param("timestamp")
+	timestamp := defaultTimestamp(c.Param("timestamp")) // contains at least leading / due to redirect
 
 	entryCalories, err := strconv.Atoi(calories)
 	if err != nil {
@@ -125,7 +139,7 @@ func addEntry(c *gin.Context) {
 		return
 	}
 
-	added, err := edb.addEntry(entry{time.Now().Unix(), food, entryCalories})
+	added, err := edb.addEntry(entry{timestamp, food, entryCalories})
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
@@ -165,7 +179,7 @@ func main() {
 	v1 := r.Group("/api/v1")
 	{
 		v1.GET("entry", getEntries)
-		v1.POST("entry/:food/:calories", addEntry)
+		v1.POST("entry/:food/:calories/*timestamp", addEntry)
 	}
 
 	// By default it serves on :8080 unless a
