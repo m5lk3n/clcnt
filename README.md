@@ -17,6 +17,12 @@ go get -u github.com/gin-gonic/gin
 - https://www.allhandsontech.com/programming/golang/web-app-sqlite-go/
 - https://www.epochconverter.com/
 
+### further refs
+
+- https://www.golang.dk/articles/go-and-sqlite-in-the-cloud
+- https://github.com/maragudk/sqlite-app
+- https://github.com/maragudk/sqlite-app/blob/main/cmd/server/main.go
+
 ## to do
 
 - Makefile
