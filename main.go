@@ -1,116 +1,24 @@
 package main
 
 import (
-	"database/sql"
-	"errors"
-	"log"
 	"net/http"
-	"os"
 	"strconv"
 	"time"
+
+	log "github.com/sirupsen/logrus"
+
+	"lttl.dev/clcnt/models"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type entryDB struct {
-	db *sql.DB
-}
-
-type entry struct {
-	Timestamp int64
-	Food      string
-	Calories  int
-}
+var reg *models.Registry
 
 func checkErr(err error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-
-// idempotent
-func (edb entryDB) createTableIfNeeded() {
-	entriesTable := `CREATE TABLE entries (
-        id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-		"timestamp" INTEGER,
-        "food" TEXT,
-        "calories" INTEGER);`
-	query, err := edb.db.Prepare(entriesTable)
-	if err != nil {
-		if err.Error() == "table entries already exists" {
-			log.Println("table already exists, skip creation")
-			return
-		} else {
-			checkErr(err)
-		}
-	}
-
-	query.Exec()
-	log.Println("table created successfully")
-}
-
-// move into package
-func (edb entryDB) getEntries() []entry {
-
-	rows, _ := edb.db.Query("SELECT timestamp, food, calories FROM entries")
-
-	defer rows.Close()
-
-	err := rows.Err()
-	checkErr(err)
-
-	entries := make([]entry, 0)
-
-	for rows.Next() {
-		anEntry := entry{}
-		err = rows.Scan(&anEntry.Timestamp, &anEntry.Food, &anEntry.Calories)
-		checkErr(err)
-
-		entries = append(entries, anEntry)
-	}
-
-	err = rows.Err()
-	checkErr(err)
-
-	return entries
-}
-
-// move into package
-func (edb entryDB) addEntry(newEntry entry) (bool, error) {
-
-	tx, err := edb.db.Begin()
-	if err != nil {
-		return false, err
-	}
-
-	stmt, err := tx.Prepare("INSERT INTO entries (timestamp, food, calories) VALUES (?, ?, ?)")
-	if err != nil {
-		return false, err
-	}
-
-	defer stmt.Close()
-
-	_, err = stmt.Exec(newEntry.Timestamp, newEntry.Food, newEntry.Calories)
-	if err != nil {
-		return false, err
-	}
-
-	tx.Commit()
-
-	return true, nil
-}
-
-func getEntries(c *gin.Context) {
-
-	entries := edb.getEntries()
-
-	if entries == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "No entries"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"entries": entries})
 }
 
 // tries to convert given string into timestamp
@@ -127,6 +35,18 @@ func defaultTimestamp(s string) int64 {
 	return time.Now().Unix()
 }
 
+func getEntries(c *gin.Context) {
+
+	e, err := reg.GetEntries()
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"entries": e})
+}
+
 func addEntry(c *gin.Context) {
 
 	food := c.Param("food")
@@ -139,40 +59,31 @@ func addEntry(c *gin.Context) {
 		return
 	}
 
-	added, err := edb.addEntry(entry{timestamp, food, entryCalories})
+	err = reg.AddEntry(models.Entry{Timestamp: timestamp, Food: food, Calories: entryCalories})
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
 	}
 
-	if added {
-		c.JSON(http.StatusOK, gin.H{"message": "entry added"})
-	} else {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "entry not added"})
-	}
+	c.JSON(http.StatusOK, gin.H{"message": "entry added"})
 }
 
-func init() {
-	const dbFile = "clcnt.db"
+func options(c *gin.Context) {
 
-	_, err := os.Stat(dbFile)
-	if errors.Is(err, os.ErrNotExist) {
-		file, err := os.Create(dbFile) // re-creates!
-		checkErr(err)
-		file.Close()
-		log.Println("database file created")
-	} else {
-		log.Println("database file already exists")
-	}
+	o := "HTTP/1.1 200 OK\n" +
+		"Allow: GET,POST,OPTIONS\n" +
+		"Access-Control-Allow-Origin: http://locahost:8080\n" +
+		"Access-Control-Allow-Methods: GET,POST,OPTIONS\n" +
+		"Access-Control-Allow-Headers: Content-Type\n"
 
-	database, _ := sql.Open("sqlite3", dbFile)
-	edb = entryDB{database}
-	edb.createTableIfNeeded()
+	c.String(200, o)
 }
-
-var edb entryDB
 
 func main() {
+
+	var err error
+	reg, err = models.NewRegistry()
+	checkErr(err)
 
 	r := gin.Default()
 
@@ -180,6 +91,7 @@ func main() {
 	{
 		v1.GET("entry", getEntries)
 		v1.POST("entry/:food/:calories/*timestamp", addEntry)
+		v1.OPTIONS("entry", options)
 	}
 
 	// By default it serves on :8080 unless a
