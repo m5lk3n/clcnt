@@ -10,12 +10,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var edb *entryDB
-
-type entryDB struct {
-	db *sql.DB
-}
-
 type Registry struct {
 }
 
@@ -25,64 +19,44 @@ type Entry struct {
 	Calories  int
 }
 
-// idempotent
-func createTableIfNeeded() error {
-	entriesTable := `CREATE TABLE entries (
-        id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-		"timestamp" INTEGER,
-        "food" TEXT,
-        "calories" INTEGER);`
-	query, err := edb.db.Prepare(entriesTable)
-	if err != nil {
-		if err.Error() == "table entries already exists" {
-			log.Println("table already exists, skip creation")
-			return nil
-		} else {
-			return err
-		}
-	}
+var rdb *regDb
 
-	query.Exec()
-	log.Println("table created successfully")
-	return nil
+type regDb struct {
+	db *sql.DB
 }
 
-// GetEntries retrieves all entries
-func (*Registry) GetEntries() ([]Entry, error) {
+func NewRegistry() (*Registry, error) {
+	const fn = "clcnt.db"
 
-	rows, _ := edb.db.Query("SELECT timestamp, food, calories FROM entries")
-
-	defer rows.Close()
-
-	err := rows.Err()
-	if err != nil {
-		return nil, err
-	}
-
-	entries := make([]Entry, 0)
-
-	for rows.Next() {
-		anEntry := Entry{}
-		err = rows.Scan(&anEntry.Timestamp, &anEntry.Food, &anEntry.Calories)
+	_, err := os.Stat(fn)
+	if errors.Is(err, os.ErrNotExist) {
+		f, err := os.Create(fn) // re-creates!
 		if err != nil {
 			return nil, err
 		}
-
-		entries = append(entries, anEntry)
+		f.Close()
+		log.Info("database file created")
+	} else {
+		log.Info("database file already exists")
 	}
 
-	err = rows.Err()
+	db, err := sql.Open("sqlite3", fn)
 	if err != nil {
 		return nil, err
 	}
 
-	return entries, nil
+	rdb = &regDb{db}
+	err = createTableIfNeeded()
+	if err != nil {
+		return nil, err
+	}
+
+	return &Registry{}, nil
 }
 
 // AddEntry adds the given Entry
 func (*Registry) AddEntry(entry Entry) error {
-
-	tx, err := edb.db.Begin()
+	tx, err := rdb.db.Begin()
 	if err != nil {
 		return err
 	}
@@ -91,7 +65,6 @@ func (*Registry) AddEntry(entry Entry) error {
 	if err != nil {
 		return err
 	}
-
 	defer stmt.Close()
 
 	_, err = stmt.Exec(entry.Timestamp, entry.Food, entry.Calories)
@@ -104,31 +77,55 @@ func (*Registry) AddEntry(entry Entry) error {
 	return nil
 }
 
-func NewRegistry() (*Registry, error) {
-	const dbFile = "clcnt.db"
+// GetEntries retrieves all entries
+func (*Registry) GetEntries() ([]Entry, error) {
+	r, _ := rdb.db.Query("SELECT timestamp, food, calories FROM entries")
+	defer r.Close()
 
-	_, err := os.Stat(dbFile)
-	if errors.Is(err, os.ErrNotExist) {
-		file, err := os.Create(dbFile) // re-creates!
+	err := r.Err()
+	if err != nil {
+		return nil, err
+	}
+
+	entries := make([]Entry, 0)
+
+	for r.Next() {
+		entry := Entry{}
+		err = r.Scan(&entry.Timestamp, &entry.Food, &entry.Calories)
 		if err != nil {
 			return nil, err
 		}
-		file.Close()
-		log.Println("database file created")
-	} else {
-		log.Println("database file already exists")
+
+		entries = append(entries, entry)
 	}
 
-	database, err := sql.Open("sqlite3", dbFile)
+	err = r.Err()
 	if err != nil {
 		return nil, err
 	}
 
-	edb = &entryDB{database}
-	err = createTableIfNeeded()
+	return entries, nil
+}
+
+// idempotent
+func createTableIfNeeded() error {
+	t := `CREATE TABLE entries (
+        id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+		"timestamp" INTEGER,
+        "food" TEXT,
+        "calories" INTEGER);`
+	q, err := rdb.db.Prepare(t)
 	if err != nil {
-		return nil, err
+		if err.Error() == "table entries already exists" {
+			log.Info("table already exists, skip creation")
+			return nil
+		} else {
+			return err
+		}
 	}
 
-	return &Registry{}, nil
+	q.Exec()
+	log.Info("table created successfully")
+
+	return nil
 }

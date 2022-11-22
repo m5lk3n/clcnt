@@ -24,7 +24,6 @@ func checkErr(err error) {
 // tries to convert given string into timestamp
 // defaults to current Unix epoch time
 func defaultTimestamp(s string) int64 {
-
 	s = s[1:] // chop leading /
 
 	n, err := strconv.ParseInt(s, 10, 64)
@@ -36,19 +35,16 @@ func defaultTimestamp(s string) int64 {
 }
 
 func getEntries(c *gin.Context) {
-
-	e, err := reg.GetEntries()
-
+	entries, err := reg.GetEntries()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"entries": e})
+	c.JSON(http.StatusOK, gin.H{"entries": entries})
 }
 
 func addEntry(c *gin.Context) {
-
 	food := c.Param("food")
 	calories := c.Param("calories")
 	timestamp := defaultTimestamp(c.Param("timestamp")) // contains at least leading / due to redirect
@@ -69,7 +65,6 @@ func addEntry(c *gin.Context) {
 }
 
 func options(c *gin.Context) {
-
 	o := "HTTP/1.1 200 OK\n" +
 		"Allow: GET,POST,OPTIONS\n" +
 		"Access-Control-Allow-Origin: http://locahost:8080\n" +
@@ -80,7 +75,6 @@ func options(c *gin.Context) {
 }
 
 func main() {
-
 	var err error
 	reg, err = models.NewRegistry()
 	checkErr(err)
