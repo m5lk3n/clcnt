@@ -34,7 +34,7 @@ func defaultTimestamp(s string) int64 {
 	return time.Now().Unix()
 }
 
-func getEntries(c *gin.Context) {
+func getEntriesHandler(c *gin.Context) {
 	entries, err := reg.GetEntries()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
@@ -44,7 +44,7 @@ func getEntries(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"entries": entries})
 }
 
-func addEntry(c *gin.Context) {
+func addEntryHandler(c *gin.Context) {
 	food := c.Param("food")
 	calories := c.Param("calories")
 	timestamp := defaultTimestamp(c.Param("timestamp")) // contains at least leading / due to redirect
@@ -64,7 +64,7 @@ func addEntry(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "entry added"})
 }
 
-func options(c *gin.Context) {
+func optionsHandler(c *gin.Context) {
 	o := "HTTP/1.1 200 OK\n" +
 		"Allow: GET,POST,OPTIONS\n" +
 		"Access-Control-Allow-Origin: http://locahost:8080\n" +
@@ -74,21 +74,64 @@ func options(c *gin.Context) {
 	c.String(200, o)
 }
 
+// NotFoundHandler to indicate that requested resource could not be found
+func notFoundHandler(c *gin.Context) {
+	// log this event as it could be an attempt to break in...
+	log.Infoln("Not found, requested URL path:", c.Request.URL.Path)
+	c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "requested resource not found", "status": http.StatusNotFound})
+}
+
+// LivenessHandler always returns HTTP 200, consider using ReadinessHandler instead
+func livenessHandler(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"message": "alive", "status": http.StatusOK})
+}
+
+// ReadinessHandler indicates HTTP 200 if ready, otherwise HTTP 503
+func readinessHandler(c *gin.Context) {
+	if true { // TODO
+		c.JSON(http.StatusOK, gin.H{"message": "ready", "status": http.StatusOK})
+	} else {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"message": "unavailable", "status": http.StatusServiceUnavailable})
+	}
+}
+
+// SetupRouter is published here to allow setup of tests
+func SetupRouter() *gin.Engine {
+	r := gin.Default()
+
+	// to debug: r.Use(gindump.Dump())
+
+	r.Use(gin.Recovery()) // "recover from any panics", write 500 if any
+
+	// r.Use(static.Serve("/", static.LocalFile("./static", true)))
+
+	r.NoRoute(notFoundHandler)
+
+	// generic API
+	r.GET("/healthy", livenessHandler)
+	r.GET("/ready", readinessHandler)
+
+	// specific API
+	v1 := r.Group("/api/v1")
+	{
+		v1.GET("entry", getEntriesHandler)
+		v1.POST("entry/:food/:calories/*timestamp", addEntryHandler)
+		v1.OPTIONS("entry", optionsHandler)
+	}
+
+	return r
+}
+
 func main() {
 	var err error
 	reg, err = models.NewRegistry()
 	checkErr(err)
 
-	r := gin.Default()
+	r := SetupRouter()
 
-	v1 := r.Group("/api/v1")
-	{
-		v1.GET("entry", getEntries)
-		v1.POST("entry/:food/:calories/*timestamp", addEntry)
-		v1.OPTIONS("entry", options)
-	}
+	log.Info("clcnt server start...")
+	defer log.Info("clcnt server shutdown!")
 
-	// By default it serves on :8080 unless a
-	// PORT environment variable was defined.
-	r.Run()
+	// set port via PORT environment variable
+	r.Run() // default port is 8080
 }
