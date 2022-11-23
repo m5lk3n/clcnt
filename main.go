@@ -64,11 +64,31 @@ func addEntryHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "entry added"})
 }
 
-func optionsHandler(c *gin.Context) {
+func entryOptionsHandler(c *gin.Context) {
 	o := "HTTP/1.1 200 OK\n" +
 		"Allow: GET,POST,OPTIONS\n" +
-		"Access-Control-Allow-Origin: http://locahost:8080\n" +
+		"Access-Control-Allow-Origin: http://locahost:8080\n" + // TODO
 		"Access-Control-Allow-Methods: GET,POST,OPTIONS\n" +
+		"Access-Control-Allow-Headers: Content-Type\n"
+
+	c.String(200, o)
+}
+
+func getTodaysCaloriesHandler(c *gin.Context) {
+	calories, err := reg.GetTodaysCalories()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"timespan": "today", "calories": calories})
+}
+
+func caloriesOptionsHandler(c *gin.Context) {
+	o := "HTTP/1.1 200 OK\n" +
+		"Allow: GET,OPTIONS\n" +
+		"Access-Control-Allow-Origin: http://locahost:8080\n" + // TODO
+		"Access-Control-Allow-Methods: GET,OPTIONS\n" +
 		"Access-Control-Allow-Headers: Content-Type\n"
 
 	c.String(200, o)
@@ -116,7 +136,9 @@ func SetupRouter() *gin.Engine {
 	{
 		v1.GET("entry", getEntriesHandler)
 		v1.POST("entry/:food/:calories/*timestamp", addEntryHandler)
-		v1.OPTIONS("entry", optionsHandler)
+		v1.OPTIONS("entry", entryOptionsHandler)
+		v1.GET("calories/24", getTodaysCaloriesHandler) // TODO: 24 ok?
+		v1.OPTIONS("calories", caloriesOptionsHandler)
 	}
 
 	return r

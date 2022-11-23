@@ -2,18 +2,9 @@
 
 calories counter
 
-## init
+## init & build
 
-```bash
-go mod init lttl.dev/clcnt
-go get -u github.com/sirupsen/logrus
-go get -u github.com/mattn/go-sqlite3
-go get -u github.com/gin-gonic/gin
-```
-
-## build
-
-`go build`
+See `make`.
 
 ## run
 
@@ -25,10 +16,15 @@ go get -u github.com/gin-gonic/gin
 
 `GIN_MODE=release ./clcnt`
 
+## backup & restore
+
+To back up and restore, simply copy `clcnt.db`.
+
 ## bookmarks
 
 - https://www.allhandsontech.com/programming/golang/how-to-use-sqlite-with-go/
 - https://www.allhandsontech.com/programming/golang/web-app-sqlite-go/
+- https://sqlitebrowser.org/
 - https://www.epochconverter.com/
 
 ### further refs
@@ -39,6 +35,13 @@ go get -u github.com/gin-gonic/gin
 
 ## to do
 
-- Sum current day
 - Sum last 7 days
 - Sum overall
+- readinessHandler
+- TODOs
+
+## backlog
+
+- Update entries
+- Delete specific entries
+- Delete old entries
