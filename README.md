@@ -4,12 +4,26 @@ calories counter
 
 ## init
 
-```
+```bash
 go mod init lttl.dev/clcnt
 go get -u github.com/sirupsen/logrus
 go get -u github.com/mattn/go-sqlite3
 go get -u github.com/gin-gonic/gin
 ```
+
+## build
+
+`go build`
+
+## run
+
+### dev
+
+`./clcnt`
+
+### production
+
+`GIN_MODE=release ./clcnt`
 
 ## bookmarks
 
@@ -25,8 +39,6 @@ go get -u github.com/gin-gonic/gin
 
 ## to do
 
-- Makefile
-
-## open
-
-- improve router
+- Sum current day
+- Sum last 7 days
+- Sum overall
