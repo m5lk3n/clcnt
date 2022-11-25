@@ -37,7 +37,7 @@ func defaultTimestamp(s string) int64 {
 func getEntriesHandler(c *gin.Context) {
 	entries, err := reg.GetEntries()
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -57,7 +57,7 @@ func addEntryHandler(c *gin.Context) {
 
 	err = reg.AddEntry(models.Entry{Timestamp: timestamp, Food: food, Calories: entryCalories})
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -74,14 +74,32 @@ func entryOptionsHandler(c *gin.Context) {
 	c.String(200, o)
 }
 
-func getTodaysCaloriesHandler(c *gin.Context) {
-	calories, err := reg.GetTodaysCalories()
+func getCaloriesHandler(c *gin.Context) {
+	d := c.DefaultQuery("days", "1")
+
+	days, err := strconv.Atoi(d)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Illegal parameter"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"timespan": "today", "calories": calories})
+	if days < 1 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Illegal parameter"})
+		return
+	}
+
+	t := getDaysAgoAsUnix(days)
+
+	calories, err := reg.GetCalories(t)
+	if err != nil {
+		log.Infof(":::%v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	avg := calories / days
+
+	c.JSON(http.StatusOK, gin.H{"days": d, "avg_calories": avg})
 }
 
 func caloriesOptionsHandler(c *gin.Context) {
@@ -137,7 +155,7 @@ func SetupRouter() *gin.Engine {
 		v1.GET("entry", getEntriesHandler)
 		v1.POST("entry/:food/:calories/*timestamp", addEntryHandler)
 		v1.OPTIONS("entry", entryOptionsHandler)
-		v1.GET("calories/24", getTodaysCaloriesHandler) // TODO: 24 ok?
+		v1.GET("calories", getCaloriesHandler)
 		v1.OPTIONS("calories", caloriesOptionsHandler)
 	}
 
@@ -156,4 +174,19 @@ func main() {
 
 	// set port via PORT environment variable
 	r.Run() // default port is 8080
+}
+
+// TODO: move to class
+func getStartOfTodayAsUnix() int64 {
+	t := time.Now()
+	m := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
+
+	return m.Unix()
+}
+
+// TODO: move to class
+func getDaysAgoAsUnix(d int) int64 {
+	t := getStartOfTodayAsUnix()
+
+	return t - int64((d-1)*24*60*60)
 }

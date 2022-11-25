@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"os"
-	"time"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 
@@ -108,21 +108,19 @@ func (*Registry) GetEntries() ([]Entry, error) {
 	return entries, nil
 }
 
-// GetTodaysCalories sums up calory entries since midnight
-func (*Registry) GetTodaysCalories() (int, error) {
+// GetCalories sums up calory entries since given time as Unix timestamp
+func (*Registry) GetCalories(t int64) (int, error) {
 	stmt, err := rdb.db.Prepare("SELECT SUM(calories) FROM entries WHERE timestamp >= ?")
-
 	if err != nil {
 		return -1, err
 	}
 
-	m := int(getStartOfTodayInMs())
 	var calories int
-	sqlErr := stmt.QueryRow(m).Scan(&calories)
-
+	sqlErr := stmt.QueryRow(t).Scan(&calories)
 	if sqlErr != nil {
-		if sqlErr == sql.ErrNoRows {
-			return -1, nil
+		if sqlErr == sql.ErrNoRows || strings.HasPrefix(sqlErr.Error(), "sql: Scan error on column") {
+			log.Info("empty result")
+			return 0, nil
 		}
 		return -1, sqlErr
 	}
@@ -151,11 +149,4 @@ func createTableIfNeeded() error {
 	log.Info("table created successfully")
 
 	return nil
-}
-
-func getStartOfTodayInMs() int64 {
-	t := time.Now()
-	m := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
-
-	return m.Unix()
 }
