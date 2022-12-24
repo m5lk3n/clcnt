@@ -47,6 +47,8 @@ To back up and restore, simply copy `clcnt.db`.
 - Test boundaries
 - readinessHandler
 - TODOs
+- license / font awesome
+- release build
 
 ## backlog
 

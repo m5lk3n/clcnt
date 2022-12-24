@@ -23,7 +23,7 @@ init:
 
 .PHONY: get
 get:
-	# go get github.com/gin-gonic/contrib/static
+	go get github.com/gin-gonic/contrib/static
 	go get github.com/gin-gonic/gin
 	go get github.com/sirupsen/logrus
 	go get -u github.com/mattn/go-sqlite3

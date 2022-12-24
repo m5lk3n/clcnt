@@ -9,6 +9,7 @@ import (
 
 	"lttl.dev/clcnt/models"
 
+	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -133,21 +134,27 @@ func readinessHandler(c *gin.Context) {
 	}
 }
 
+func homeHandler(c *gin.Context) {
+	c.HTML(http.StatusOK, "home.tmpl", gin.H{"title": "clcnt", "content": "clcnt"})
+}
+
 // SetupRouter is published here to allow setup of tests
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
+	r.SetTrustedProxies(nil) // https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies
 
 	// to debug: r.Use(gindump.Dump())
 
 	r.Use(gin.Recovery()) // "recover from any panics", write 500 if any
-
-	// r.Use(static.Serve("/", static.LocalFile("./static", true)))
+	r.LoadHTMLGlob("templates/*")
+	r.Use(static.Serve("/", static.LocalFile("./static", true)))
 
 	r.NoRoute(notFoundHandler)
 
 	// generic API
 	r.GET("/healthy", livenessHandler)
 	r.GET("/ready", readinessHandler)
+	r.GET("/home", homeHandler)
 
 	// specific API
 	v1 := r.Group("/api/v1")
