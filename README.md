@@ -45,10 +45,15 @@ To back up and restore, simply copy `clcnt.db`.
 ## to do
 
 - Test boundaries
-- readinessHandler
+- Move code into packages
 - TODOs
-- license / font awesome
-- release build
+- License / font awesome
+- Release build
+- Production run
+
+## open
+
+- favicon.ico needed?
 
 ## backlog
 

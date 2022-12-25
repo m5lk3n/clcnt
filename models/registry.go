@@ -55,6 +55,18 @@ func NewRegistry() (*Registry, error) {
 	return &Registry{}, nil
 }
 
+// IsReady returns only true if the underlying DB is pingable (see https://pkg.go.dev/database/sql#DB.Ping)
+func (*Registry) IsReady() bool {
+	if rdb != nil && rdb.db != nil {
+		err := rdb.db.Ping()
+		if err == nil {
+			return true
+		}
+	}
+
+	return false
+}
+
 // AddEntry adds the given Entry
 func (*Registry) AddEntry(entry Entry) error {
 	tx, err := rdb.db.Begin()

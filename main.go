@@ -127,7 +127,7 @@ func livenessHandler(c *gin.Context) {
 
 // ReadinessHandler indicates HTTP 200 if ready, otherwise HTTP 503
 func readinessHandler(c *gin.Context) {
-	if true { // TODO
+	if reg != nil && reg.IsReady() {
 		c.JSON(http.StatusOK, gin.H{"message": "ready", "status": http.StatusOK})
 	} else {
 		c.JSON(http.StatusServiceUnavailable, gin.H{"message": "unavailable", "status": http.StatusServiceUnavailable})
