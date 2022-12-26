@@ -44,8 +44,9 @@ To back up and restore, simply copy `clcnt.db`.
 
 ## to do
 
-- Test boundaries
+- Test boundaries (backend and frontend (see min/max for input type number))
 - Move code into packages
+- Set frontend default values based upon browser time
 - TODOs
 - License / font awesome
 - Release build
@@ -53,7 +54,7 @@ To back up and restore, simply copy `clcnt.db`.
 
 ## open
 
-- favicon.ico needed?
+- Serve static via Gin router (https://github.com/gin-gonic/gin#serving-static-files)?
 
 ## backlog
 

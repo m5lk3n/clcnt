@@ -134,8 +134,9 @@ func readinessHandler(c *gin.Context) {
 	}
 }
 
+// homeHandler provides the landing page
 func homeHandler(c *gin.Context) {
-	c.HTML(http.StatusOK, "home.tmpl", gin.H{"title": "clcnt", "content": "clcnt"})
+	c.HTML(http.StatusOK, "home.tmpl", gin.H{"title": "clcnt", "header": "clcnt"})
 }
 
 // SetupRouter is published here to allow setup of tests
