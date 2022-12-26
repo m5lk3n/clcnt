@@ -43,13 +43,25 @@
     </p>
 
     <script type="text/javascript">
-      function handleClick(event) {
+      function handleAdd(event) {
         food = document.getElementById("food").value;
         cal = document.getElementById("calories").value;
-        console.log(food + " " + cal); // TODO post
+
+        fetch("/api/v1/entry/" + food + "/" + cal, {
+          method: "POST",
+          headers: {'Content-Type': 'application/json'}
+        }).then(res => {
+          if(res.status == 200) {
+            alert("Entry added."); // TODO: make Bootstrap Toast
+            location.reload(); // force page update
+          } else {
+            console.log("Add failed with response:", res);
+            alert("Couldn't add entry, see console for details"); // TODO: make Bootstrap Toast
+          }
+        });
       }
 
-      document.getElementById("btnAdd").addEventListener("click", handleClick);
+      document.getElementById("btnAdd").addEventListener("click", handleAdd);
     </script>
   </body>
 </html>
