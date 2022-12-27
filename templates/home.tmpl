@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
   <head>
     <meta charset="utf-8">
@@ -15,6 +16,7 @@
     <h2>{{ .header }}</h2>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
 
+    <!-- ADD -->
     <div class="form-group">
       <div class="input-group mb-3">
         <label class="input-group-text" for="food">Food:</label>
@@ -35,14 +37,36 @@
       <button id="btnAdd" type="button" class="btn btn-primary">Add</button>
     </div>
 
-    <!-- TODO: show get values -->
+    <!-- GET -->
+    <hr/>
+    <div class="input-group mb-3">
+      <span class="input-group-text">Today's kcal in total</span>
+      <input readonly id="caloriesToday" type="number" class="form-control" aria-label="Today's calories in total">
+    </div>
 
+    <!-- footer -->
+    <hr/>
     <p>
-      <hr/>
-      <small>Made in the Lowlands <i class="fa-solid fa-umbrella-beach"></i>, built on the Mountains <i class="fa-solid fa-mountain"></i></small>
+      <small>Made in the Lowlands <i class="fa-solid fa-umbrella-beach"></i>, built on the Mountains <i class="fa-solid fa-mountain"></i> with <i class="fa-solid fa-heart"></i></small>
     </p>
 
     <script type="text/javascript">
+      function initTodaysCalories() {
+        fetch("/api/v1/calories")
+          .then((response) => response.json()) // TODO: check response code
+          .then((data) => {
+            document.getElementById("caloriesToday").value = data.avg_calories;
+          })
+          .catch((error) => {
+            console.log("Getting today's calories failed with error: ", error);
+            alert("Couldn't get today's calories, see console for details"); // TODO: make Bootstrap Toast
+          });
+      }
+
+      function init() {
+        initTodaysCalories();
+      }
+
       function handleAdd(event) {
         food = document.getElementById("food").value;
         cal = document.getElementById("calories").value;
@@ -50,18 +74,25 @@
         fetch("/api/v1/entry/" + food + "/" + cal, {
           method: "POST",
           headers: {'Content-Type': 'application/json'}
-        }).then(res => {
+        })
+        .then(res => {
           if(res.status == 200) {
             alert("Entry added."); // TODO: make Bootstrap Toast
             location.reload(); // force page update
           } else {
-            console.log("Add failed with response:", res);
+            console.log("Add failed with response: ", res);
             alert("Couldn't add entry, see console for details"); // TODO: make Bootstrap Toast
           }
+        })
+        .catch((error) => {
+            console.log("Add failed with error: ", error);
+            alert("Couldn't add entry, see console for details"); // TODO: make Bootstrap Toast
         });
       }
 
       document.getElementById("btnAdd").addEventListener("click", handleAdd);
+
+      window.onload = init;
     </script>
   </body>
 </html>
