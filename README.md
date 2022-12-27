@@ -46,8 +46,7 @@ To back up and restore, simply copy `clcnt.db`.
 
 - Test boundaries (backend and frontend (see min/max for input type number))
 - Move code into packages
-- Set frontend default values based upon browser time
-- TODOs
+- TODOs in code
 - License / font awesome
 - Release build
 - Production run

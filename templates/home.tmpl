@@ -21,11 +21,11 @@
       <div class="input-group mb-3">
         <label class="input-group-text" for="food">Food</label>
         <select id="food" class="form-select" aria-label="Food">
-          <option value="Breakfast" selected>Breakfast</option>
+          <option value="Breakfast">Breakfast</option>
           <option value="Lunch">Lunch</option>
           <option value="Dinner">Dinner</option>
           <option disabled>──────────</option>
-          <option value="Misc">Misc</option>
+          <option value="Misc" selected>Misc</option>
         </select>
       </div>
 
@@ -79,7 +79,22 @@
         });
       }
 
+      // Pre-selects food based upon hour
+      function initFood() {
+        const now = new Date();
+        let hour = now.getHours();
+        if(hour>5 && hour<11) {
+          document.getElementById("food").value = "Breakfast";
+        } else if(hour>10 && hour<14) {
+          document.getElementById("food").value = "Lunch";
+        } else if(hour>16 && hour<22) {
+          document.getElementById("food").value = "Dinner";
+        }
+      }
+
       function init() {
+        initFood();
+
         initCalories(1,"caloriesToday");
         initCalories(3,"calories3Days");
         initCalories(7,"caloriesWeek");
