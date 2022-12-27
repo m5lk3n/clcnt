@@ -79,17 +79,22 @@
         });
       }
 
-      // Pre-selects food based upon hour
+      // Pre-selects food based upon hour of the day
       function initFood() {
         const now = new Date();
-        let hour = now.getHours();
-        if(hour>5 && hour<11) {
-          document.getElementById("food").value = "Breakfast";
-        } else if(hour>10 && hour<14) {
-          document.getElementById("food").value = "Lunch";
-        } else if(hour>16 && hour<22) {
-          document.getElementById("food").value = "Dinner";
+        let h = now.getHours();
+        switch(true) {
+          case (h>5 && h<11):
+            document.getElementById("food").value = "Breakfast";
+            break;
+          case (h>10 && h<14):
+            document.getElementById("food").value = "Lunch";
+            break;
+          case(h>16 && h<21):
+            document.getElementById("food").value = "Dinner";
+            break;
         }
+        // default is "Misc" as per 'selected' above
       }
 
       function init() {
