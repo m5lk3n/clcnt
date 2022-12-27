@@ -44,7 +44,7 @@ To back up and restore, simply copy `clcnt.db`.
 
 ## to do
 
-- Test boundaries (backend and frontend (see min/max for input type number))
+- Test boundaries (backend and frontend)
 - Move code into packages
 - TODOs in code
 - License / font awesome

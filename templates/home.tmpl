@@ -105,9 +105,32 @@
         initCalories(7,"caloriesWeek");
       }
 
+      // Checks whether or not calories are within input type number's min and max
+      // (for some reason, this isn't enforced properly by the HTML component)
+      function isInbounds(cal) {
+        val = parseInt(cal.value); // required to make sure that we're comparing numbers here
+        min = parseInt(cal.min);
+        max = parseInt(cal.max);
+        switch(true) {
+          case (val < min):
+            cal.value = min;
+            return false;
+          case (val > max):
+            cal.value = max;
+            return false;
+        }
+        return true;
+      }
+
       function handleAdd(event) {
+        calElement = document.getElementById("calories");
+        if (!isInbounds(calElement)) {
+          alert("kcal out of bounds! Value will be reset now. Please check and add again."); // TODO: make Bootstrap Toast
+          return false;
+        }
+
         food = document.getElementById("food").value;
-        cal = document.getElementById("calories").value;
+        cal = calElement.value;
 
         fetch("/api/v1/entry/" + food + "/" + cal, {
           method: "POST",
