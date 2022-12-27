@@ -19,7 +19,7 @@
     <!-- ADD -->
     <div class="form-group">
       <div class="input-group mb-3">
-        <label class="input-group-text" for="food">Food:</label>
+        <label class="input-group-text" for="food">Food</label>
         <select id="food" class="form-select" aria-label="Food">
           <option value="Breakfast" selected>Breakfast</option>
           <option value="Lunch">Lunch</option>
@@ -43,6 +43,14 @@
       <span class="input-group-text">Today's kcal in total</span>
       <input readonly id="caloriesToday" type="number" class="form-control" aria-label="Today's calories in total">
     </div>
+    <div class="input-group mb-3">
+      <span class="input-group-text">Last 3 days' kcal in average</span>
+      <input readonly id="calories3Days" type="number" class="form-control" aria-label="Last 3 days' calories in average">
+    </div>
+    <div class="input-group mb-3">
+      <span class="input-group-text">This week's kcal in average</span>
+      <input readonly id="caloriesWeek" type="number" class="form-control" aria-label="This week's calories in average">
+    </div>
 
     <!-- footer -->
     <hr/>
@@ -51,20 +59,30 @@
     </p>
 
     <script type="text/javascript">
-      function initTodaysCalories() {
-        fetch("/api/v1/calories")
-          .then((response) => response.json()) // TODO: check response code
-          .then((data) => {
-            document.getElementById("caloriesToday").value = data.avg_calories;
-          })
-          .catch((error) => {
-            console.log("Getting today's calories failed with error: ", error);
-            alert("Couldn't get today's calories, see console for details"); // TODO: make Bootstrap Toast
-          });
+      function initCalories(days, id) { // TODO: make async
+        fetch("/api/v1/calories?days=" + days, {
+          headers: {'Content-Type': 'application/json'}
+        }).then((res) => {
+          if(res.status != 200) {
+            console.log("Initializing calories failed with response: ", res);
+            alert("Couldn't initialize calories, see console for details"); // TODO: make Bootstrap Toast
+          } else {
+            return res.json().then(data => {
+              if(data.avg_calories) {
+                document.getElementById(id).value = data.avg_calories;
+              }
+            });
+          }
+        }).catch((error) => {
+          console.log("Initializing calories failed with error: ", error);
+          alert("Couldn't initialize calories, see console for details"); // TODO: make Bootstrap Toast
+        });
       }
 
       function init() {
-        initTodaysCalories();
+        initCalories(1,"caloriesToday");
+        initCalories(3,"calories3Days");
+        initCalories(7,"caloriesWeek");
       }
 
       function handleAdd(event) {
