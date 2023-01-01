@@ -1,6 +1,6 @@
 # clcnt
 
-A calories counter.
+A **c**a**l**ories **c**ou**nt**er.
 
 ## init & build
 
@@ -42,19 +42,17 @@ To back up and restore, simply copy `clcnt.db`.
 - https://www.golang.dk/articles/go-and-sqlite-in-the-cloud
 - https://github.com/maragudk/sqlite-app
 - https://github.com/maragudk/sqlite-app/blob/main/cmd/server/main.go
+- https://github.com/gin-gonic/gin#serving-static-files
 
 ## to do
 
+- Rename to calcnt
 - Test boundaries (backend and frontend)
 - Move code into packages/includes (backend and frontend)
 - TODOs in code
 - License / font awesome
-- Release build
-- Production run
-
-## open
-
-- Serve static via Gin router (https://github.com/gin-gonic/gin#serving-static-files)?
+- Production run with `GIN_MODE=release ./clcnt`
+- Documentation (Swagger)
 
 ## backlog
 

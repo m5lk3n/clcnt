@@ -1,6 +1,8 @@
 package main
 
 import (
+	"embed"
+	"html/template"
 	"net/http"
 	"strconv"
 	"time"
@@ -9,7 +11,6 @@ import (
 
 	"lttl.dev/clcnt/models"
 
-	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -134,28 +135,43 @@ func readinessHandler(c *gin.Context) {
 	}
 }
 
-// homeHandler provides the landing page
-func homeHandler(c *gin.Context) {
-	c.HTML(http.StatusOK, "home.tmpl", gin.H{"title": "clcnt", "header": "clcnt"})
+// indexHandler provides the landing page
+func indexHandler(c *gin.Context) {
+	c.HTML(http.StatusOK, "index.tmpl", gin.H{"title": "clcnt", "header": "clcnt"})
 }
+
+//go:embed assets/* templates/*
+var f embed.FS
 
 // SetupRouter is published here to allow setup of tests
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
 	r.SetTrustedProxies(nil) // https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies
 
+	// https://github.com/gin-gonic/gin#build-a-single-binary-with-templates
+	t := template.Must(template.New("").ParseFS(f, "templates/*.tmpl"))
+	r.SetHTMLTemplate(t) // do not use the following with SetHTMLTemplate: r.LoadHTMLGlob("templates/*")
+	// conflicts with getting /favicon.ico: r.StaticFS("/", http.FS(f))
+
+	r.GET("favicon.ico", func(c *gin.Context) {
+		file, _ := f.ReadFile("assets/favicon.ico")
+		c.Data(
+			http.StatusOK,
+			"image/x-icon",
+			file,
+		)
+	})
+
 	// to debug: r.Use(gindump.Dump())
 
 	r.Use(gin.Recovery()) // "recover from any panics", write 500 if any
-	r.LoadHTMLGlob("templates/*")
-	r.Use(static.Serve("/", static.LocalFile("./static", true)))
 
 	r.NoRoute(notFoundHandler)
 
 	// generic API
 	r.GET("/healthy", livenessHandler)
 	r.GET("/ready", readinessHandler)
-	r.GET("/home", homeHandler)
+	r.GET("/", indexHandler)
 
 	// specific API
 	v1 := r.Group("/api/v1")
