@@ -50,7 +50,7 @@ To back up and restore, simply copy `clcnt.db`.
 - Test boundaries (backend and frontend)
 - Move code into packages/includes (backend and frontend)
 - TODOs in code
-- License / font awesome
+- Add disclaimer, mention sources, esp. font awesome
 - Production run with `GIN_MODE=release ./clcnt`
 - Documentation (Swagger)
 
