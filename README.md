@@ -1,10 +1,10 @@
 # clcnt
 
-Calories counter.
+A calories counter.
 
 ## init & build
 
-See `make`.
+Run `make`.
 
 ## run
 
@@ -35,6 +35,7 @@ To back up and restore, simply copy `clcnt.db`.
 - https://www.allhandsontech.com/programming/golang/web-app-sqlite-go/
 - https://sqlitebrowser.org/
 - https://www.epochconverter.com/
+- https://developers.google.com/chart/interactive/docs/gallery/gauge
 
 ### further refs
 
@@ -45,7 +46,7 @@ To back up and restore, simply copy `clcnt.db`.
 ## to do
 
 - Test boundaries (backend and frontend)
-- Move code into packages
+- Move code into packages/includes (backend and frontend)
 - TODOs in code
 - License / font awesome
 - Release build
