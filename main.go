@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"flag"
 	"html/template"
 	"net/http"
 	"strconv"
@@ -16,6 +17,17 @@ import (
 )
 
 var reg *models.Registry
+var debugFlag *bool
+
+func init() {
+	debugFlag = flag.Bool("debug", false, "turn debug output on/off")
+
+	flag.Parse()
+
+	if *debugFlag {
+		log.SetLevel(log.DebugLevel)
+	}
+}
 
 func checkErr(err error) {
 	if err != nil {
@@ -145,6 +157,10 @@ var f embed.FS
 
 // SetupRouter is published here to allow setup of tests
 func SetupRouter() *gin.Engine {
+	if !*debugFlag {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
 	r := gin.Default()
 	r.SetTrustedProxies(nil) // https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies
 

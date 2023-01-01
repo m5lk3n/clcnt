@@ -10,11 +10,11 @@ Run `make`.
 
 ### dev
 
-`./clcnt`
+`./clcnt -debug` or `go run main.go -debug`
 
 ### production
 
-`GIN_MODE=release ./clcnt`
+`./clcnt`
 
 ## usage (localhost)
 
@@ -51,7 +51,6 @@ To back up and restore, simply copy `clcnt.db`.
 - Move code into packages/includes (backend and frontend)
 - TODOs in code
 - Add disclaimer, mention sources, esp. font awesome
-- Production run with `GIN_MODE=release ./clcnt`
 - Documentation (Swagger)
 
 ## backlog
