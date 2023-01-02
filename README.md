@@ -1,6 +1,15 @@
 # clcnt
 
-A **c**a**l**ories **c**ou**nt**er.
+A **c**a**l**ories **c**ou**nt**er with a `go` backend and a web frontend, intended to run locally on a (Pixel) smartphone.
+
+## prerequisites
+
+AT WORK!
+
+### Runtime
+
+- A Pixel (6) device with `termux` installed.
+- golang (1.19) installed on `termux`.
 
 ## init & build
 
@@ -18,6 +27,12 @@ Run `make`.
 
 ## usage (localhost)
 
+### frontend
+
+Browse to [localhost](http://localhost:8080).
+
+### backend
+
 | Use case | Verb | URL |
 | --- | --- | --- |
 | Add breakfast entry with 350 calories | POST | localhost:8080/api/v1/entry/Breakfast/350 |
@@ -27,7 +42,7 @@ Run `make`.
 
 ## backup & restore
 
-To back up and restore, simply copy `clcnt.db`.
+To back up and restore, simply copy `clcnt.db`. **Backup prior to every update!**
 
 ## bookmarks
 
@@ -44,6 +59,10 @@ To back up and restore, simply copy `clcnt.db`.
 - https://github.com/maragudk/sqlite-app/blob/main/cmd/server/main.go
 - https://github.com/gin-gonic/gin#serving-static-files
 
+## known issues
+
+- `make build` and `make build-dist` don't seem to work on a Macbook. I didn't investigate.
+
 ## to do
 
 - Rename to calcnt
@@ -51,7 +70,7 @@ To back up and restore, simply copy `clcnt.db`.
 - Move code into packages/includes (backend and frontend)
 - TODOs in code
 - Add disclaimer, mention sources, esp. font awesome
-- Documentation (Swagger)
+- Documentation (Swagger, deployment)
 
 ## backlog
 
