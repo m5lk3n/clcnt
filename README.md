@@ -77,8 +77,8 @@ To back up and restore, simply copy `clcnt.db`. **Backup prior to every update!*
 
 - Rename to calcnt
 - Test boundaries (backend and frontend)
-- Move code into packages/includes (backend and frontend)
-- TODOs in code
+- Move code into packages (backend)
+- TODOs in code (backend)
 - Add disclaimer, mention sources, esp. font awesome
 - Documentation (Swagger, deployment)
 
