@@ -67,6 +67,52 @@
     <small>Made in the Lowlands <span style="color:#ffffcc"><i class="fa-solid fa-umbrella-beach"></i></span>, built on the Mountains <span style="color:white"><i class="fa-solid fa-mountain"></i></span> with <span style="color:red"><i class="fa-solid fa-heart"></i></span></small>
     </p>
 
+    <!-- toasts, all hidden by default -->
+    <div class="position-fixed top-50 start-50 translate-middle p-3" style="z-index: 11">
+      <div id="addToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            Entry added. Page will reload shortly...
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="position-fixed top-50 start-50 translate-middle p-3" style="z-index: 11">
+      <div id="outOfBoundsToast" class="toast align-items-center text-white bg-warning border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            Calories are out of bounds! Value has been reset. Please check and add again.
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="position-fixed top-50 start-50 translate-middle p-3" style="z-index: 11">
+      <div id="initErrorToast" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            Couldn't initialize calories, see console for details!
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="position-fixed top-50 start-50 translate-middle p-3" style="z-index: 11">
+      <div id="addErrorToast" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            Couldn't add entry, see console for details!
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- JS -->
     <script type="text/javascript">
       // HTTP-GETs the (average) calories for the given days and sets the corresponding readonly input fields 
       function initCalories(days, id) { // don't make async: 1. this is supposed to run on the same server and 2. to have values for the charts to init. (see below)
@@ -75,7 +121,7 @@
         }).then((res) => {
           if(res.status != 200) {
             console.log("Initializing calories failed with response: ", res);
-            alert("Couldn't initialize calories, see console for details"); // TODO: make Bootstrap Toast
+            showToast("initErrorToast");
           } else {
             return res.json().then(data => {
               if(data.avg_calories) {
@@ -85,7 +131,7 @@
           }
         }).catch((error) => {
           console.log("Initializing calories failed with error: ", error);
-          alert("Couldn't initialize calories, see console for details"); // TODO: make Bootstrap Toast
+          showToast("initErrorToast");
         });
       }
 
@@ -119,6 +165,10 @@
       // (for some reason, this isn't enforced properly by the HTML component)
       function isInbounds(cal) {
         val = parseInt(cal.value, 10); // parseInt is required to make sure that we're comparing numbers here
+        if(isNaN(val)){ // Firefox allows characters to be entered in a number input field, so let's deal with it...
+          cal.value = 350; // fallback value, 350 -> see above
+          return false;
+        }
         min = parseInt(cal.min, 10);
         max = parseInt(cal.max, 10);
         switch(true) {
@@ -132,11 +182,18 @@
         return true;
       }
 
+      function showToast(elementId) {
+        var elementToast = document.getElementById(elementId);
+        if (elementToast) {
+          bootstrap.Toast.getOrCreateInstance(elementToast).show();
+        }
+      }
+
       // Handles Add button press
       function handleAdd(event) {
         calElement = document.getElementById("calories");
         if (!isInbounds(calElement)) {
-          alert("kcal out of bounds! Value will be reset now. Please check and add again."); // TODO: make Bootstrap Toast
+          showToast("outOfBoundsToast");
           return false;
         }
 
@@ -149,16 +206,18 @@
         })
         .then(res => {
           if(res.status == 200) {
-            alert("Entry added."); // TODO: make Bootstrap Toast
-            location.reload(); // force page update
+            showToast("addToast");
+            setTimeout(function() {
+              location.reload(); // force page update
+            }, 1500);
           } else {
             console.log("Add failed with response: ", res);
-            alert("Couldn't add entry, see console for details"); // TODO: make Bootstrap Toast
+            showToast("addErrorToast");
           }
         })
         .catch((error) => {
             console.log("Add failed with error: ", error);
-            alert("Couldn't add entry, see console for details"); // TODO: make Bootstrap Toast
+            showToast("addErrorToast");
         });
       }
 

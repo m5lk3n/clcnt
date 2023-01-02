@@ -75,8 +75,7 @@ To back up and restore, simply copy `clcnt.db`. **Backup prior to every update!*
 
 ## to do
 
-- Rename to calcnt
-- Test boundaries (backend and frontend)
+- Test boundaries (backend)
 - Move code into packages (backend)
 - TODOs in code (backend)
 - Add disclaimer, mention sources, esp. font awesome
@@ -84,6 +83,7 @@ To back up and restore, simply copy `clcnt.db`. **Backup prior to every update!*
 
 ## backlog
 
+- Rename to calcnt
 - Update entries
 - Delete specific entries
 - Delete old entries
