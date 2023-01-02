@@ -19,11 +19,21 @@ Run `make`.
 
 ### dev
 
-`./clcnt -debug` or `go run main.go -debug`
+`go run main.go -debug`
+
+OR
+
+```
+make build
+./clcnt -debug
+```
 
 ### production
 
-`./clcnt`
+```
+make build
+./clcnt
+```
 
 ## usage (localhost)
 
@@ -59,9 +69,9 @@ To back up and restore, simply copy `clcnt.db`. **Backup prior to every update!*
 - https://github.com/maragudk/sqlite-app/blob/main/cmd/server/main.go
 - https://github.com/gin-gonic/gin#serving-static-files
 
-## known issues
+## known limitations
 
-- `make build` and `make build-dist` don't seem to work on a Macbook. I didn't investigate.
+- There's no cross-compilation for the target platform (Pixel 6) from the development platform (macOS or Linux). 
 
 ## to do
 

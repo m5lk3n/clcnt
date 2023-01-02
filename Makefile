@@ -8,10 +8,8 @@ help:
 	@echo "    clean       to delete the go module"
 	@echo "    init        to initialize the module"
 	@echo "    get         to fetch all package dependencies"
-	@echo "    build       to compile a self-contained binary (for linux amd64 architecture, intended for (local) test & deployment)"
-	@echo "    build-dist  to compile a self-contained binary (for android arm64 architecture, intended for distribution (phone deployment))"
-	@echo "    all         to run all targets but build-dist"
-	@echo "    all-dist    to run all targets but build"
+	@echo "    build       to compile a self-contained binary (for the local architecture)"
+	@echo "    all         to run all targets"
 	@echo
 	@echo "    help        to show this text"
 
@@ -32,14 +30,7 @@ get:
 	
 .PHONY: build
 build:
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build
-
-.PHONY: build-dist
-build-dist:
-	GOOS=android GOARCH=arm64 CGO_ENABLED=1 go build
+	CGO_ENABLED=1 go build
 
 .PHONY: all
 all: clean init get build
-
-.PHONY: all-dist
-all-dist: clean init get build-dist
