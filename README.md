@@ -67,11 +67,12 @@ To back up and restore, simply copy `clcnt.db`. **Backup prior to every update!*
 - https://www.golang.dk/articles/go-and-sqlite-in-the-cloud
 - https://github.com/maragudk/sqlite-app
 - https://github.com/maragudk/sqlite-app/blob/main/cmd/server/main.go
+- https://www.aleksandrhovhannisyan.com/blog/use-rems-for-font-size/
 - https://github.com/gin-gonic/gin#serving-static-files
 
 ## known limitations
 
-- There's no cross-compilation for the target platform (Pixel 6) from the development platform (macOS or Linux). 
+- There's no cross-compilation for the target platform (Pixel 6) from the development platform (macOS or Linux). Build locally instead. 
 
 ## to do
 
