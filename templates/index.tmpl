@@ -66,7 +66,8 @@
     <!-- footer -->
     <hr/>
     <p>
-    <small>Made in the Lowlands <span style="color:#ffffcc"><i class="fa-solid fa-umbrella-beach"></i></span>, built on the Mountains <span style="color:white"><i class="fa-solid fa-mountain"></i></span> with <span style="color:red"><i class="fa-solid fa-heart"></i></span></small>
+      <small>Made in the Lowlands <span style="color:#ffffcc"><i class="fa-solid fa-umbrella-beach"></i></span>, built on the Mountains <span style="color:white"><i class="fa-solid fa-mountain"></i></span> with <span style="color:red"><i class="fa-solid fa-heart"></i></span></small>
+      <center><img alt="lttl.dev logo" src="https://lttl.dev/v1/images/logo.png" width="100"/></center>
     </p>
 
     <!-- toasts, all hidden by default -->
@@ -191,11 +192,22 @@
         }
       }
 
+      function registerHandleAdd() {
+        document.getElementById("buttonAdd").addEventListener("click", handleAdd);
+      }
+
+      function unregisterHandleAdd() {
+        document.getElementById("buttonAdd").removeEventListener("click", handleAdd);
+      }
+
       // Handles Add button press
       function handleAdd(event) {
+        unregisterHandleAdd();
+
         calElement = document.getElementById("calories");
         if (!isInbounds(calElement)) {
           showToast("outOfBoundsToast");
+          registerHandleAdd();
           return false;
         }
 
@@ -215,15 +227,17 @@
           } else {
             console.log("Add failed with response: ", res);
             showToast("addErrorToast");
+            registerHandleAdd();
           }
         })
         .catch((error) => {
             console.log("Add failed with error: ", error);
             showToast("addErrorToast");
+            registerHandleAdd();
         });
       }
 
-      document.getElementById("buttonAdd").addEventListener("click", handleAdd);
+      registerHandleAdd();
 
       // -- CHART section start --
       google.charts.load('current', {'packages':['gauge']});
