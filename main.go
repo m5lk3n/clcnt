@@ -6,11 +6,11 @@ import (
 	"html/template"
 	"net/http"
 	"strconv"
-	"time"
 
 	log "github.com/sirupsen/logrus"
 
 	"lttl.dev/clcnt/models"
+	"lttl.dev/clcnt/time"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/mattn/go-sqlite3"
@@ -35,19 +35,6 @@ func checkErr(err error) {
 	}
 }
 
-// tries to convert given string into timestamp
-// defaults to current Unix epoch time
-func defaultTimestamp(s string) int64 {
-	s = s[1:] // chop leading /
-
-	n, err := strconv.ParseInt(s, 10, 64)
-	if err == nil {
-		return n
-	}
-
-	return time.Now().Unix()
-}
-
 func getEntriesHandler(c *gin.Context) {
 	entries, err := reg.GetEntries()
 	if err != nil {
@@ -61,7 +48,7 @@ func getEntriesHandler(c *gin.Context) {
 func addEntryHandler(c *gin.Context) {
 	food := c.Param("food")
 	calories := c.Param("calories")
-	timestamp := defaultTimestamp(c.Param("timestamp")) // contains at least leading / due to redirect
+	timestamp := time.DefaultTimestamp(c.Param("timestamp")) // contains at least leading / due to redirect
 
 	entryCalories, err := strconv.Atoi(calories)
 	if err != nil {
@@ -81,7 +68,7 @@ func addEntryHandler(c *gin.Context) {
 func entryOptionsHandler(c *gin.Context) {
 	o := "HTTP/1.1 200 OK\n" +
 		"Allow: GET,POST,OPTIONS\n" +
-		"Access-Control-Allow-Origin: http://locahost:8080\n" + // TODO
+		"Access-Control-Allow-Origin: http[s]://<host>[:<port>]\n" +
 		"Access-Control-Allow-Methods: GET,POST,OPTIONS\n" +
 		"Access-Control-Allow-Headers: Content-Type\n"
 
@@ -102,7 +89,7 @@ func getCaloriesHandler(c *gin.Context) {
 		return
 	}
 
-	t := getDaysAgoAsUnix(days)
+	t := time.GetDaysAgoAsUnix(days)
 
 	calories, err := reg.GetCalories(t)
 	if err != nil {
@@ -119,7 +106,7 @@ func getCaloriesHandler(c *gin.Context) {
 func caloriesOptionsHandler(c *gin.Context) {
 	o := "HTTP/1.1 200 OK\n" +
 		"Allow: GET,OPTIONS\n" +
-		"Access-Control-Allow-Origin: http://locahost:8080\n" + // TODO
+		"Access-Control-Allow-Origin: http[s]://<host>[:port]\n" +
 		"Access-Control-Allow-Methods: GET,OPTIONS\n" +
 		"Access-Control-Allow-Headers: Content-Type\n"
 
@@ -214,19 +201,4 @@ func main() {
 
 	// set port via PORT environment variable
 	r.Run() // default port is 8080
-}
-
-// TODO: move to class
-func getStartOfTodayAsUnix() int64 {
-	t := time.Now()
-	m := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
-
-	return m.Unix()
-}
-
-// TODO: move to class
-func getDaysAgoAsUnix(d int) int64 {
-	t := getStartOfTodayAsUnix()
-
-	return t - int64((d-1)*24*60*60)
 }

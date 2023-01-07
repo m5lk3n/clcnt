@@ -24,14 +24,14 @@ Run `make`.
 OR
 
 ```
-make build
+make build # run on the development system
 ./clcnt -debug
 ```
 
 ### production
 
 ```
-make build
+make build # run on the device (Pixel 6)
 ./clcnt
 ```
 
@@ -76,14 +76,13 @@ To back up and restore, simply copy `clcnt.db`. **Backup prior to every update!*
 
 ## to do
 
-- Test boundaries (backend)
-- Move code into packages (backend)
-- TODOs in code (backend)
+- Add tests, incl. boundaries (backend)
 - Add disclaimer, mention sources, esp. font awesome
 - Documentation (Swagger, deployment)
 
 ## backlog
 
+- Build in auto-backup option
 - Rename to calcnt
 - Update entries
 - Delete specific entries
