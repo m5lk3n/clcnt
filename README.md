@@ -9,16 +9,18 @@ In a nutshell, the application counts the calories as entered througout the day,
 
 ![Frontend](frontend.png)
 
+(The magic number "1900" is the amount of calories I burn every day according to the experts. It can be changed in [here](templates/index.tmpl), just search for, well, "1900".)
+
 As I like `go`, Linux (which is more or less ready to be used on my smartphone anyway) and experiments, I ended up implementing the app this way, i.e. not as a "traditional smartphone app" that can be loaded onto the phone, e.g. via a provider app store. 
 
-All app data is stored anonymously in a SQLite database which resides locally on the phone's Linux - no app data is supposed to leave the phone. The app doesn't use cookies either.
+All app data is stored locally and anonymously in a SQLite database which resides on the phone's Linux - no app data is supposed to leave the phone. The app doesn't use cookies either.
 The frontend downloads JavaScript and stylesheets from third party CDNs. While the [lttl.dev](https://lttl.dev) logo is my own, the icons used are from [Font Awesome](https://fontawesome.com/). The gauges come in via a Google's library.
 
 Disclaimer:
 - This is a hobby project that I only use for my private purpose but which I wanted to share. Feel free to use it (for your inspiration).
-- There's no installer, not much automation, no ready-to-use, out-of-the-box, one-click solution. 
-- Use at your own risk. There's no support, no warranty, no guarantee, nothing whatsoever. Your data and time loss, is your loss. Any damage is yours.
-- The soures that I used are referenced, esp. listed below under bookmarks.
+- While there's some automation via `Makefile`, there's no installer, no ready-to-use, out-of-the-box, one-click solution. 
+- Use at your own risk. There's no support, no warranty, no guarantee, nothing whatsoever. Your data and time loss, is your loss. Any potential damage is yours.
+- Sources that I used are referenced, esp. listed below under bookmarks.
 - I don't know what CDNs, or other apps/libs/... that are used here, see or store in terms of (meta) data resulting from running and using this app! However, I'm not suggesting anything here; it's just a disclaimer...
 
 ## prerequisites
@@ -66,11 +68,11 @@ It should look as follows (with an existing DB):
 
 ### frontend
 
-Browse to [localhost](http://localhost:8080), it shoud look like the first screenshot above. I tested with a most recent Chrome and Firefox version at the time of writing.
+Browse to [localhost](http://localhost:8080), it should look like the first screenshot above. I tested with the most recent Chrome and Firefox versions at the time of writing.
 
 ### backend
 
-Here's a summary of the backend API which is (partially) used by the frontend:
+Here's an exemplified extract of the backend API which is (partially) used by the frontend:
 
 | Use case | Verb | URL |
 | --- | --- | --- |
