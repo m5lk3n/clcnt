@@ -1,0 +1,97 @@
+host: localhost:8080
+info:
+  contact:
+    name: clcnt API Support
+    url: https://github.com/m5lk3n/clcnt
+  description: This is the clcnt API server.
+  license:
+    name: MIT
+    url: https://github.com/m5lk3n/clcnt/blob/main/LICENSE
+  title: clcnt API
+  version: "1.0"
+paths:
+  /api/v1/calories:
+    get:
+      consumes:
+      - application/json
+      description: returns today's sum of calories (if 1 day was specific) or the
+        average for the amount of given days
+      parameters:
+      - description: recent day(s) to retrieve calories for
+        in: query
+        name: days
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+      summary: handler to retrieve calories
+  /api/v1/entry:
+    get:
+      consumes:
+      - application/json
+      description: returns all food entries with calories and timestamp, there's neither
+        filtering nor pagination
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+      summary: handler to retrieve all entries
+  /api/v1/entry/{food}/{calories}:
+    post:
+      consumes:
+      - application/json
+      description: adds an entry with the given food and calories with the current
+        Unix timestamp
+      parameters:
+      - description: single word that describes the food (allowed characters are URL
+          path entries/SQLite strings)
+        in: path
+        name: food
+        required: true
+        type: string
+      - description: amount of calories
+        in: path
+        name: calories
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+      summary: handler to add an entry with calories
+  /healthy:
+    get:
+      consumes:
+      - application/json
+      description: always indicates that the API server is alive, consider using readiness
+        handler instead
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: liveness handler
+  /ready:
+    get:
+      consumes:
+      - application/json
+      description: indicates whether or not the API server and its database are ready
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "503":
+          description: Service Unavailable
+      summary: readiness handler
+swagger: "2.0"

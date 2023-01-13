@@ -22,6 +22,7 @@ Disclaimer:
 - Use at your own risk. There's no support, no warranty, no guarantee, nothing whatsoever. Your data and time loss, is your loss. Any potential damage is yours.
 - Sources that I used are referenced, esp. listed below under bookmarks.
 - I don't know what CDNs, or other apps/libs/... that are used here, see or store in terms of (meta) data resulting from running and using this app! However, I'm not suggesting anything here; it's just a disclaimer...
+- I'm also not responsible for linked, external contents.
 
 ## prerequisites
 
@@ -29,6 +30,7 @@ Disclaimer:
 
 - A Pixel 6 device (in my case, but could work with other Android phones as well) with [Termux](https://f-droid.org/en/packages/com.termux/) installed via [F-Droid](https://f-droid.org/).
 - golang (1.19 in my case) installed on Termux ([1](https://www.techncyber.com/2022/12/golang-in-termux.html) and [2](http://rafalgolarz.com/blog/2017/01/15/running_golang_on_android/) are nice write ups.)
+- [swag](https://github.com/swaggo/swag) `go install github.com/swaggo/swag/cmd/swag@latest`
 
 ## init & build
 
@@ -38,9 +40,9 @@ Run `make` to see what's doable.
 
 ### dev
 
-Invoke the following on your local development machine, e.g. a Linux or macOS shell:
+Invoke the following on your local development machine, e.g. a Linux or macOS shell, to ensure the Swagger documentation is up-to-date:
 
-`go run main.go -debug`
+`make run`
 
 OR
 
@@ -81,6 +83,8 @@ Here's an exemplified extract of the backend API which is (partially) used by th
 | Get today's calories in total | GET | localhost:8080/api/v1/calories |
 | Get 3 days calories average | GET | localhost:8080/api/v1/calories?days=3 |
 
+For the full API documentation, see http://localhost:8080/swagger.
+
 ## backup & restore
 
 This is your responsibility!
@@ -109,14 +113,21 @@ Sources that I used / took inspiration from:
 ## to do
 
 - Add tests, incl. boundaries (backend)
-- Add API documentation (Swagger)
+- Show certain thresholds/achievements (e.g. calories saved this week) (as toasts)
 
 ## backlog
 
 1. Build in auto-backup option
-2. Rename to calcnt
+2. Rename to calcnt, "Count Cali", "Kali-nikta" or "Fat Dracula"?
 3. Update entries
 4. Delete specific entries
 5. Delete old entries
+6. Retrieve (certain) entries
 
-As a workaround for 3-5 for now, use [DB Browser for SQLite](https://sqlitebrowser.org/).
+As a workaround for now for
+- 3.-5., use the [DB Browser for SQLite](https://sqlitebrowser.org/)
+- 6., use the built-in Swagger interface under http://localhost:8080/swagger
+
+## open
+
+- Should [/docs](/docs) be checked in?

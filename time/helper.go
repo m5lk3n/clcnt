@@ -1,3 +1,4 @@
+// Time conversion
 package time
 
 import (
@@ -5,7 +6,7 @@ import (
 	"time"
 )
 
-// DefaultTimestamp tries to convert given string into timestamp, defaults to current Unix epoch time
+// DefaultTimestamp tries to convert the given string into a Unix timestamp, defaults to current time
 func DefaultTimestamp(s string) int64 {
 	s = s[1:] // chop leading /
 
@@ -24,7 +25,7 @@ func getStartOfTodayAsUnix() int64 {
 	return m.Unix()
 }
 
-// GetDaysAgoAsUnix converts given number of days into the Unix Epoch time
+// GetDaysAgoAsUnix converts the given number of days into the corresponding Unix time
 func GetDaysAgoAsUnix(d int) int64 {
 	t := getStartOfTodayAsUnix()
 

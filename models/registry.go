@@ -1,3 +1,4 @@
+// Database and entries
 package models
 
 import (
@@ -11,9 +12,11 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+// Registry defines the type
 type Registry struct {
 }
 
+// Entry represents a Registry (database) entry
 type Entry struct {
 	Timestamp int64
 	Food      string
@@ -26,6 +29,7 @@ type regDb struct {
 	db *sql.DB
 }
 
+// NewRegistry creates a new database
 func NewRegistry() (*Registry, error) {
 	const fn = "clcnt.db"
 
@@ -55,7 +59,7 @@ func NewRegistry() (*Registry, error) {
 	return &Registry{}, nil
 }
 
-// IsReady returns only true if the underlying DB is pingable (see https://pkg.go.dev/database/sql#DB.Ping)
+// IsReady returns only true if the underlying database is pingable (see https://pkg.go.dev/database/sql#DB.Ping)
 func (*Registry) IsReady() bool {
 	if rdb != nil && rdb.db != nil {
 		err := rdb.db.Ping()
@@ -67,7 +71,7 @@ func (*Registry) IsReady() bool {
 	return false
 }
 
-// AddEntry adds the given Entry
+// AddEntry adds the given Entry to the Registry
 func (*Registry) AddEntry(entry Entry) error {
 	tx, err := rdb.db.Begin()
 	if err != nil {
@@ -90,7 +94,7 @@ func (*Registry) AddEntry(entry Entry) error {
 	return nil
 }
 
-// GetEntries retrieves all entries
+// GetEntries retrieves all entries from the Registry
 func (*Registry) GetEntries() ([]Entry, error) {
 	r, _ := rdb.db.Query("SELECT timestamp, food, calories FROM entries")
 	defer r.Close()
@@ -120,7 +124,7 @@ func (*Registry) GetEntries() ([]Entry, error) {
 	return entries, nil
 }
 
-// GetCalories sums up calory entries since given time as Unix timestamp
+// GetCalories sums up calory entries since given Unix timestamp
 func (*Registry) GetCalories(t int64) (int, error) {
 	stmt, err := rdb.db.Prepare("SELECT SUM(calories) FROM entries WHERE timestamp >= ?")
 	if err != nil {

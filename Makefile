@@ -8,8 +8,9 @@ help:
 	@echo "    clean       to delete the go module"
 	@echo "    init        to initialize the module"
 	@echo "    get         to fetch all package dependencies"
+	@echo "    run         to run the code without binary compilation"
 	@echo "    build       to compile a self-contained binary (for the local architecture)"
-	@echo "    all         to run all targets"
+	@echo "    all         to run all targets but run"
 	@echo
 	@echo "    help        to show this text"
 
@@ -26,10 +27,23 @@ get:
 	go get github.com/gin-gonic/contrib/static
 	go get github.com/gin-gonic/gin
 	go get github.com/sirupsen/logrus
-	go get -u github.com/mattn/go-sqlite3
-	
+	go get github.com/mattn/go-sqlite3
+	go get github.com/swaggo/gin-swagger
+
+.PHONY: needs_swag # checks existence of required tool, fails if not available
+needs_swag:
+	swag > /dev/null
+
+.PHONY: init_swag
+init_swag: needs_swag
+	swag init
+
+.PHONY: run
+run: init_swag
+	go run main.go -debug
+
 .PHONY: build
-build:
+build: init_swag
 	CGO_ENABLED=1 go build
 
 .PHONY: all
