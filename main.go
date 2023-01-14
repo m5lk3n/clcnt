@@ -33,8 +33,7 @@ func init() {
 //go:embed assets/* templates/*
 var f embed.FS
 
-// SetupRouter is published to allow setup of tests
-func SetupRouter() *gin.Engine {
+func setupRouter() *gin.Engine {
 	if !*debugFlag {
 		gin.SetMode(gin.ReleaseMode)
 	}
@@ -99,7 +98,7 @@ func SetupRouter() *gin.Engine {
 
 // @host      localhost:8080
 func main() {
-	r := SetupRouter()
+	r := setupRouter()
 
 	log.Info("clcnt server start...")
 	defer log.Info("clcnt server shutdown!")

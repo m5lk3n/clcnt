@@ -22,7 +22,8 @@ Disclaimer:
 - Use at your own risk. There's no support, no warranty, no guarantee, nothing whatsoever. Your data and time loss, is your loss. Any potential damage is yours.
 - Sources that I used are referenced, esp. listed below under bookmarks.
 - I don't know what CDNs, or other apps/libs/... that are used here, see or store in terms of (meta) data resulting from running and using this app! However, I'm not suggesting anything here; it's just a disclaimer...
-- I'm also not responsible for linked, external contents.
+- In general, I'm not responsible for linked, external contents.
+- My project neither claims to be correct nor complete.
 
 ## prerequisites
 
@@ -35,6 +36,11 @@ Disclaimer:
 ## init & build
 
 Run `make` to see what's doable.
+
+## test
+
+To run backend API tests, instead of `go test`, execute `make test` as this backs up and restores any existing DB.
+*If tests fail, `clcnt.bak` may need to be restored manually to `clcnt.db`!*
 
 ## run
 
@@ -50,6 +56,8 @@ OR
 make build
 ./clcnt -debug
 ```
+
+Both `make` targets ensure that the Swagger documentation is updated. Hence, do not run via `go run main.go`.
 
 ### production
 
@@ -106,13 +114,12 @@ Sources that I used / took inspiration from:
 - GitHub
 - Stack Overflow
 
-## known limitations
+## known limitation
 
 - There's no cross-compilation for the target platform (Pixel 6) from the development platform (macOS or Linux). Build locally instead.
 
 ## to do
 
-- Add tests, incl. boundaries (backend)
 - Show certain thresholds/achievements (e.g. calories saved this week) (as toasts)
 
 ## backlog
@@ -131,3 +138,4 @@ As a workaround for now for
 ## open
 
 - Should [/docs](/docs) be checked in?
+- Move sources under /src?

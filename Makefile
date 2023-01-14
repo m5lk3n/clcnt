@@ -5,18 +5,20 @@ help:
 	@echo
 	@echo "  where <target> is one of the following"
 	@echo
-	@echo "    clean       to delete the go module"
+	@echo "    clean       to delete the go module and the binary"
 	@echo "    init        to initialize the module"
 	@echo "    get         to fetch all package dependencies"
+	@echo "    test        to run all tests"
 	@echo "    run         to run the code without binary compilation"
 	@echo "    build       to compile a self-contained binary (for the local architecture)"
-	@echo "    all         to run all targets but run"
+	@echo "    all         to run all targets but test and run"
 	@echo
 	@echo "    help        to show this text"
 
 .PHONY: clean
 clean:
 	rm -f go.mod
+	rm -f clcnt
 
 .PHONY: init
 init:
@@ -24,11 +26,19 @@ init:
 
 .PHONY: get
 get:
+	# go mod tidy
 	go get github.com/gin-gonic/contrib/static
 	go get github.com/gin-gonic/gin
 	go get github.com/sirupsen/logrus
 	go get github.com/mattn/go-sqlite3
 	go get github.com/swaggo/gin-swagger
+
+.PHONY: test
+test:
+	mv clcnt.db clcnt.bak 2>/dev/null || true
+	rm -f clcnt-test.db
+	go test
+	mv clcnt.bak clcnt.db 2>/dev/null || rm -f clcnt.db
 
 .PHONY: needs_swag # checks existence of required tool, fails if not available
 needs_swag:
