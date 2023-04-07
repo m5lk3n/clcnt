@@ -138,4 +138,8 @@ As a workaround for now for
 ## open
 
 - Should [/docs](/docs) be checked in?
-- Move sources under /src?
+- Move sources under ./internal?
+
+## result
+
+For the interested reader, [here](result.md)'s the outcome...
